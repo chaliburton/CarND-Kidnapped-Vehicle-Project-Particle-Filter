@@ -43,7 +43,29 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+  default_random_engine gen;
 
+  for (int i=0; i<num_particles;i++){
+    float pred_x;
+    float pred_y;
+    float pred_theta;
+
+    if (yaw_rate==0){
+      pred_x = particles[i].x + velocity * delta_t * cos(particles[i].theta);
+      pred_y = particles[i].y + velocity * delta_t * sin(particles[i].theta);
+      pred_theta = particles[i].theta;
+    } else {
+      pred_x = particles[i].x + velocity/yaw_rate * (sin(particles[i].theta+yaw_rate*delta_t) - sin(particles[i].theta));
+      pred_y = particles[i].y + velocity/yaw_rate * (cos(particles[i].theta) - cos(particles[i].theta+yaw_rate*delta_t));
+      pred_theta = particles[i].theta + yaw_rate*delta_t;
+    }
+    std::normal_distribution<double> N_x(pred_x,std_pos[0]);  //create normal distribuion around predicted_x  revisit this as perhaps this should be around the sensor inputs?
+    std::normal_distribution<double> N_y(pred_y,std_pos[1]);
+    std::normal_distribution<double> N_theta(pred_theta,std_pos[2]);
+    
+    particles[i].x = N_x(gen);          //pick a value from the normal distribution for the new x
+    particles[i].y = N_y(gen);          //pick a value from the normal distribution for the new y
+    particles[i].theta = N_theta(gen);  //pick a value from the normal distribution for the new theta
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
