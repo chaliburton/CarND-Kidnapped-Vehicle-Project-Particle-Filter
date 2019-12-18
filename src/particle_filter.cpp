@@ -44,12 +44,11 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
   default_random_engine gen;
-
+  
   for (int i=0; i<num_particles;i++){
     float pred_x;
     float pred_y;
     float pred_theta;
-
     if (yaw_rate==0){
       pred_x = particles[i].x + velocity * delta_t * cos(particles[i].theta);
       pred_y = particles[i].y + velocity * delta_t * sin(particles[i].theta);
@@ -79,6 +78,22 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   during the updateWeights phase.
    */
 
+  
+  for (int i=0; i<observations.size;++i){
+    
+    double closest_obs_range =99999;
+    int tempID = -1;
+
+    
+    for (int j=0; j<predicted.size();j++){
+      double range = dist(predicted[j].x, predicted[j].y, observations[i].x,observations[i].y)
+      if (range<closest_obs_range){
+        closest_obs_range = range;
+        tempID = predicted[j].id;
+      }
+    }
+    observations[i].id = tempID;
+  } 
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
@@ -97,7 +112,44 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
+  theta = -M_PI/2;
+    
+  //vector<int> associations;
+  //vector<double> sense_x;
+  //vector<double> sense_y;
 
+  // For each particle, P, with observations in vehicle-grid, translate observations to map-grid (particle data stays as estimate)
+  for (int p=0; p<num_particles;++p){
+    LandmarkObs obsTranslated;                          //translated observations
+    vector<LandmarkObs> obsTrans_v;                     //vector of all translated observations for a given particle
+    
+    for (int o=0; o<observations.size();o++){
+      obsTranslated.x = particles[p].x + (cos(theta) * observations[o].x) - (sin(theta) * observations[o].y);
+      obsTranslated.y = particles[p].y + (sin(theta) * observations[o].x) + (cos(theta) * observations[o].x);
+      //insert calculation of standard deviation & normal distribution of sensor error
+      obsTranslated.id = -1;
+      obsTrans_v.push_back(obsTranslated);              //assign to a vector of observations
+    }
+    
+    vector<LandmarkObs> landmarksInRange;
+    //Eliminate landmarks that are out of range, sensor_range, for particle p, still iterating through particle by particle
+    for (int l=0; l<map_landmarks.size();l++){
+      double landmarkRange = dist(particles[p].x, particles[p].y, map_landmarks[l].x_f,map_landmarks[l].y_f)
+      if (landmarkRange<sensor_range){
+        landmarksInRange.push_back(map_landmarks[l]);
+      }
+    }
+    //Associate each observation with the closest landmark
+    /*question about associating landmarks with corresponding measurements vs vice versa.  This would decrease the probability
+      whereas 1 accurate sensor hit in a cluster of landmarks would result in high probability vs driving it down.
+      */
+    dataAssociation(landmarksInRange, obsTrans_v);
+       
+    // Continue with updated probability for this observation
+    for (int o=0; o<obsTrans_v.size();o++){
+      
+    }
+  }
 }
 
 void ParticleFilter::resample() {
