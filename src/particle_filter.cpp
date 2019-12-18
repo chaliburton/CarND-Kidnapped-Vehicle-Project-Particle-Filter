@@ -146,9 +146,23 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     dataAssociation(landmarksInRange, obsTrans_v);
        
     // Continue with updated probability for this observation
-    for (int o=0; o<obsTrans_v.size();o++){
-      
+    float gaussProb = 1.0;
+    for (int o=0; o<obsTrans_v.size();++o){
+      unsigned int l = 0;
+      while(l<landmarksInRange.size()){
+        if (landmarksInRange[l].id == obsTrans_v[o].id){
+          gaussProb *= multiv_prob(std_landmark[0], std_landmark[1], obsTrans_v[o].x, obsTrans_v[o].y, landmarksInRange[l].x, landmarksInRange[l].y);
+          l = landmarksInRange.size();
+        } else {
+            l++;
+        }
+      }
+        
     }
+    if (gaussProb==0){
+      gaussProb = 0.000000001;
+    }
+    particles[p].weight = gaussProb;
   }
 }
 
