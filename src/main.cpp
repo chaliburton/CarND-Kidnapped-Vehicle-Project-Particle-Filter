@@ -27,7 +27,6 @@ string hasData(string s) {
 
 int main() {
   uWS::Hub h;
-
   // Set up parameters here
   double delta_t = 0.1;  // Time elapsed between measurements [sec]
   double sensor_range = 50;  // Sensor range [m]
@@ -43,9 +42,9 @@ int main() {
     std::cout << "Error: Could not open map file" << std::endl;
     return -1;
   }
-
   // Create particle filter
   ParticleFilter pf;
+  std::cout << "created pf";
 
   h.onMessage([&pf,&map,&delta_t,&sensor_range,&sigma_pos,&sigma_landmark]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
@@ -58,6 +57,7 @@ int main() {
 
       if (s != "") {
         auto j = json::parse(s);
+        std::cout << "here1 pf"<<std::endl;
 
         string event = j[0].get<string>();
         
@@ -65,6 +65,7 @@ int main() {
           // j[1] is the data JSON object
           if (!pf.initialized()) {
             // Sense noisy position data from the simulator
+            //std::cout << "creating initializing";
             double sense_x = std::stod(j[1]["sense_x"].get<string>());
             double sense_y = std::stod(j[1]["sense_y"].get<string>());
             double sense_theta = std::stod(j[1]["sense_theta"].get<string>());
@@ -75,7 +76,7 @@ int main() {
             //   (noiseless control) data.
             double previous_velocity = std::stod(j[1]["previous_velocity"].get<string>());
             double previous_yawrate = std::stod(j[1]["previous_yawrate"].get<string>());
-
+            std::cout << "predicting";
             pf.prediction(delta_t, sigma_pos, previous_velocity, previous_yawrate);
           }
 
@@ -108,6 +109,7 @@ int main() {
           }
 
           // Update the weights and resample
+
           pf.updateWeights(sensor_range, sigma_landmark, noisy_observations, map);
           pf.resample();
 
