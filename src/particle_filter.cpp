@@ -49,7 +49,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
-  default_random_engine gen;
+  std::default_random_engine gen;
   
   for (int i=0; i<num_particles;i++){
     float pred_x;
@@ -71,6 +71,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     particles[i].x = N_x(gen);          //pick a value from the normal distribution for the new x
     particles[i].y = N_y(gen);          //pick a value from the normal distribution for the new y
     particles[i].theta = N_theta(gen);  //pick a value from the normal distribution for the new theta
+  }
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
@@ -85,14 +86,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    */
 
   
-  for (int i=0; i<observations.size;++i){
+  for (unsigned int i=0; i<observations.size();++i){
     
     double closest_obs_range =99999;
     int tempID = -1;
 
     
-    for (int j=0; j<predicted.size();j++){
-      double range = dist(predicted[j].x, predicted[j].y, observations[i].x,observations[i].y)
+    for (unsigned int j=0; j<predicted.size();j++){
+      double range = dist(predicted[j].x, predicted[j].y, observations[i].x,observations[i].y);
       if (range<closest_obs_range){
         closest_obs_range = range;
         tempID = predicted[j].id;
@@ -118,7 +119,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
-  theta = -M_PI/2;
+  float theta = -M_PI/2;
     
   //vector<int> associations;
   //vector<double> sense_x;
@@ -129,7 +130,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     LandmarkObs obsTranslated;                          //translated observations
     vector<LandmarkObs> obsTrans_v;                     //vector of all translated observations for a given particle
     
-    for (int o=0; o<observations.size();o++){
+    for (unsigned int o=0; o<observations.size();o++){
       obsTranslated.x = particles[p].x + (cos(theta) * observations[o].x) - (sin(theta) * observations[o].y);
       obsTranslated.y = particles[p].y + (sin(theta) * observations[o].x) + (cos(theta) * observations[o].x);
       //insert calculation of standard deviation & normal distribution of sensor error
@@ -139,10 +140,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     
     vector<LandmarkObs> landmarksInRange;
     //Eliminate landmarks that are out of range, sensor_range, for particle p, still iterating through particle by particle
-    for (int l=0; l<map_landmarks.size();l++){
-      double landmarkRange = dist(particles[p].x, particles[p].y, map_landmarks[l].x_f,map_landmarks[l].y_f)
+    for (unsigned int l=0; l<map_landmarks.landmark_list.size();l++){
+      double landmarkRange = dist(particles[p].x, particles[p].y, map_landmarks.landmark_list[l].x_f,map_landmarks.landmark_list[l].y_f);
       if (landmarkRange<sensor_range){
-        landmarksInRange.push_back(map_landmarks[l]);
+        landmarksInRange.push_back(LandmarkObs{map_landmarks.landmark_list[l].id_i,map_landmarks.landmark_list[l].x_f,map_landmarks.landmark_list[l].y_f});
       }
     }
     //Associate each observation with the closest landmark
@@ -153,7 +154,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
        
     // Continue with updated probability for this observation
     float gaussProb = 1.0;
-    for (int o=0; o<obsTrans_v.size();++o){
+    for (unsigned int o=0; o<obsTrans_v.size();++o){
       unsigned int l = 0;
       while(l<landmarksInRange.size()){
         if (landmarksInRange[l].id == obsTrans_v[o].id){
@@ -179,8 +180,8 @@ void ParticleFilter::resample() {
    * NOTE: You may find std::discrete_distribution helpful here.
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
-  default_random_engine gen;
-  discrete_distribution<int> distribution(weights.begin(),weights.end());
+  std::default_random_engine gen;
+  std::discrete_distribution<int> distribution(weights.begin(),weights.end());
   vector<Particle> resampled_particles;
   for(int p=0;p<num_particles; p++){
     resampled_particles.push_back(particles[distribution(gen)]);
