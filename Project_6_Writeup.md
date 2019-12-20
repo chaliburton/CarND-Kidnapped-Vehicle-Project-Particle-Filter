@@ -22,7 +22,7 @@ Additionally, a function was added to helper_functions.h
 
 [image1]: ./images/Success.JPG "Successful Screenshot of Particle Filter"
 
-# [From the Project Rubric:]
+## [From the Project Rubric:]
 Does your particle filter localize the vehicle to within the desired accuracy?
   Yes, the automatic grader outputs: "Success! Your particle filter passed!" see [alt text][image1]
 
@@ -32,7 +32,7 @@ Does your particle run within the specified time of 100 seconds?
 Does your code use a particle filter to localize the robot?
   Yes, this implements a particle filter to localize the robot given initial GPS coordinates.
 
-##[particle_filter.cpp Writeup]
+## [particle_filter.cpp Writeup]
 This code defines the initial particle filter functions needed for the program to run.
 Lines 8-20 contain libraries, dependencies and declarations.
 
@@ -46,5 +46,5 @@ Lines 85-147 contain the updateWeights step of the particle filter.  In this ste
 
 Lines 149-159 contain the resample function that uses std::discrete_distribution to resample given the vector of particle weights
 
-##[helper_functions.h Writeup]
+## [helper_functions.h Writeup]
 A function "multiv_prob" was borrowed from the lectures and added to help calculate the weight using the mult-variate Gaussian distribution.
