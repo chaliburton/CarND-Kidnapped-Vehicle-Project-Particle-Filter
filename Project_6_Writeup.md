@@ -20,11 +20,11 @@ The starter code precluded functionality of the following code files:
 
 Additionally, a function was added to helper_functions.h
 
-[image1]: ./images/Success.JPG "Successful Screenshot of Particle Filter"
+[image1]: ./images/Success.jpg "Successful Screenshot of Particle Filter"
 
 ## [From the Project Rubric:]
 Does your particle filter localize the vehicle to within the desired accuracy?
-  Yes, the automatic grader outputs: "Success! Your particle filter passed!" see [alt text][image1]
+  Yes, the automatic grader outputs: "Success! Your particle filter passed!" see ![alt text][image1]
 
 Does your particle run within the specified time of 100 seconds?
   Yes, the automatic grader outputs: "Success! Your particle filter passed!"
